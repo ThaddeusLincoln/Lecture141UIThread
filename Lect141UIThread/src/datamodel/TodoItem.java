@@ -1,4 +1,4 @@
-package sample;
+package datamodel;
 
 import java.time.LocalDate;
 
