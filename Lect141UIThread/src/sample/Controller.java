@@ -1,5 +1,6 @@
 package sample;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -33,14 +34,32 @@ public class Controller {
 		
 		// We create an anonymous Runnable class : a class that is defines and created 
 		// in the same block, and it's only used once
+		// Any class that implements Runnable, means that is gonna be executed in another Thread
 		Runnable task = new Runnable() {
 			
 			@Override
 			public void run() {
 				
 				try{
+					
+					String s = Platform.isFxApplicationThread() ? "UI Thread" : "Background Thread";
+					System.out.println("I'm going to sleep on the: " + s);
+					// this action occurs in the background Thread
 					Thread.sleep(10000);
-					ourLabel.setText("Hey I'm back!!");
+					
+					// by using of this class we indicate that once the action is finished
+					// in the background thread, the modification of the scene graph will be 
+					// done in the UI-Thread, to which this method passes the information
+					Platform.runLater(new Runnable() {
+						
+						@Override
+						public void run() {
+							String s = Platform.isFxApplicationThread() ? "UI Thread" : "Background Thread";
+							System.out.println("I'm updating the label on the : " + s);
+							ourLabel.setText("Hey I'm back!!");
+						}
+					});
+					
 				}catch(InterruptedException event){
 					// we don't care about this
 				}
