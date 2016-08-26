@@ -1,0 +1,95 @@
+When we're handling a user interface we really have to consider everything than user can do. 
+So we have to actually write a lot of code to handle all the expected use cases to prevent 
+and handle all the possible error cases and also to verify user input. 
+It's difficult cause everything a user can do has to be tried and users can be quite "inventive". 
+We should never assume that user will interact with a UI in a certain way, 
+saying to ourselves "I don't have to worry cause a user will never do a thing like that" is a mistake.
+
+UI Thread ==========================================================
+
+The UI thread seats and waits for the user input, so when the user does something
+the UI-Tread sees is the application is listening for that (if there's an
+EventHandler for it), and if yes it dispatches the event to the EventHandler
+or EventListener.  
+
+The EventHandler itself runs on the UI-Thread which means that when an EventHandler 
+is running the user User Interface thread is busy and is no longer paying attention 
+to the user input. Ergo, the user won't be able to interact with the UI while that's 
+actually occurring if he/she trie to do anything at that point the application won't 
+actually respond. Even if we'll get the control back, after the UI thread finishes 
+its task and unlocks, this is definitely a bad user experience.
+
+If our EventHandlers need to do somthing that takes more than 1 second, 
+then we should be starting another Thread. This new Thread will do the 
+work that takes a while to process, so the EventHandler which is still 
+running on the UI Thread will be able to return, and the UI Thread 
+would be able to listen for input again. This will lead to a better user experience 
+because he/she won't see the pauses, the delays and the weird things that happen 
+when our application is waiting for the UI-Thread to unlock.
+
+We'll refer to this new Thread as the Background-Thread, now this backgrond-thread 
+when it has completed the work it will notify the user interface. For instance, 
+if the EventHandler needed to retrieve data from a data base, what it will probably 
+do is kick off this background thread to do the data retrieval and when that background-thread 
+has the data and it's completed what it needs to do it will inform the UI and then 
+the data can then be loaded into into the user interface. 
+
+NOTE : We can create a Runnable anonymous class to create background threads.
+
+NOTE : It's very important to notice that the scene graph ins't Thread-safe, 
+meaning that the code assumes that nodes in the screen graph will only ever be 
+updated by the same thread, basically the UI-Thread also known as JavaFX application thread. 
+So, if more than one thread could update the node, the internal integrity of the node 
+could be compromised. For instance, if Thread-A runs and starts to change the state 
+of a node and then is suspended so that Thread-B can run, nothing in JavaFx 
+prevents thread-B also from also updating the same node. Thread-B could even wipe out 
+what threat-A started; then when Thread-A resumes, it doens't know that its 
+previous update was removed/updated/overrode. 
+
+In order to prevent all of this, whenever we work with nodes on the scene graph, 
+we actually must do it in the JavaFx application thread. If we don't we'll get an ugly runtime error. 
+Normally IllegalStateException. The existence if this error in JavaFx is an improve over Swing, 
+where the recommendation to only make graphic modifications from the UI thread exists, 
+but in case we didn't enforce it we we're able to continue forward, obtaining 
+nasty bugs during the execution.
+
+Runnable : is basically an interface that classes implement when their instances 
+will be executed on a Thread (and the developer doens't want its 
+class to inherit from the Thread class). 
+
+The Platform.runlater() method what does is put the runnable parameter that's 
+passed onto the UI-thread queue. Meaning that it's gonna force the 
+Runnable object to run in the UI thread. We use:
+
+Platform.runLater(new Runnable(){...}...);
+
+Platform.isFxApplication() method : is useful, it  returns true when the code is 
+running on the JavaFX application thread and false otherwise. 
+We can actually use this methoD when we try to debug our code, 
+in cases where there's no error but we don't actually know 
+
+JavaFx provides a set of APIs that help us to run background threads and also 
+to communicate with the UI. The APIs are in the JavaFX.Concurrent package.
+
+We can use
+
+DateTimeFormatter df = DateTimeFormater.ofPattern("MMMM d, yyyy") for instance.
+
+The Application class which our Main class inherits has an stop method which we 
+can override and it would be a logical place for storing data. However the 
+Controller will need the data to populate the listView and it already has 
+access to the listView content, 
+
+We use a Sinlgleton class when we want only one instance of a class created over the 
+entire run of the application. Because of this the Singleton class creates the one 
+instance of itself. Singletons have a private constructor to ensure that no other 
+class could create an instance. There's more to those, but we can retain the Singleton 
+usually contains a static method that allows any class to get the single instance 
+and call its methods. Implying, in this case that our Main class and our 
+Controller will have an easy way to access our data. 
+
+NOTE : By creating a private constructor we prevent anyone from being able to 
+instantiate a new version of this class as an object. 
+As our method will override the one from our parent class.
+
+ 
