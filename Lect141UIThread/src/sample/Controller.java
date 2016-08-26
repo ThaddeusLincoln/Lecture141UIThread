@@ -4,12 +4,12 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 public class Controller {
 	
 	// By using the @FXML annotation we link the Controllers field to what's declared in sample.fxml 
-	
 	@FXML
 	private TextField nameField;
 	@FXML
@@ -18,6 +18,8 @@ public class Controller {
 	private Button byeButton;
 	@FXML
 	private CheckBox ourCheckBox;
+	@FXML
+	private Label ourLabel;
 	
 	// EventHandler for click on the button (either button)
 	@FXML
@@ -29,11 +31,24 @@ public class Controller {
 			System.out.println("Bye, " + nameField.getText());
 		}
 		
-		try{
-			Thread.sleep(10000);
-		}catch(InterruptedException event){
-			// we don't care about this
-		}
+		// We create an anonymous Runnable class : a class that is defines and created 
+		// in the same block, and it's only used once
+		Runnable task = new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				try{
+					Thread.sleep(10000);
+					ourLabel.setText("Hey I'm back!!");
+				}catch(InterruptedException event){
+					// we don't care about this
+				}
+			}
+		};
+		
+		// we invoke the Runnable class, here is where we actually use it
+		new Thread(task).start();
 		
 		if(ourCheckBox.isSelected()){
 			nameField.clear();
